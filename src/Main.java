@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 
 public class Main {
+    static int num_active_clients = 0;
 
     public static void main(String[] args) {
         ArrayList<Item> items = new ArrayList<>(5);
@@ -20,7 +21,10 @@ public class Main {
             while (true) {
                 try {
                     Socket client_socket = server_socket.accept();
-                    System.out.println("Подключен новый клиент");
+                    num_active_clients++;
+                    System.out.println("Подключен новый клиент " + client_number + " " + client_socket.getInetAddress()
+                            + " " + client_socket.getLocalPort());
+                    System.out.println("Число активных клиентов: " + num_active_clients + "\n");
                     ClientHandler clientHandler = new ClientHandler(client_socket, items, client_number);
                     new Thread(clientHandler).start();
                     client_number++;
@@ -56,7 +60,7 @@ public class Main {
                         System.out.println("Нет связи с клиентом " + client_number + "!");
                         break;
                     }
-                    System.out.println("Получено сообщение от клиента " + client_number + ": " + received_message);
+                    System.out.println("\nПолучено сообщение от клиента " + client_number + ": " + received_message);
                     String[] split_message = received_message.split(" ");
                     if (received_message.equals("view")) {
                         for (Item item : items) {
@@ -106,6 +110,8 @@ public class Main {
                 input.close();
                 out.close();
                 System.out.println("Каналы и сокет закрыты с клиентом " + client_number);
+                num_active_clients--;
+                System.out.println("Число активных клиентов: " + num_active_clients);
             } catch (IOException e) {
                 e.printStackTrace();
             }
